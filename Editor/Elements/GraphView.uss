@@ -1,0 +1,156 @@
+.grid-background {
+    --grid-spacing: 50;
+    --grid-thick-lines: 10;
+    --grid-line-color: rgba(0, 0, 0, 0.18);
+    --grid-thick-line-color: rgba(0, 0, 0, 0.38);
+    --grid-background-color: rgba(45, 45, 45, 1);
+}
+
+.graph-view {
+    overflow: hidden;
+    flex-direction: column;
+    font-size: 12px;
+}
+
+.backstop {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+.content-view-container {
+    position: absolute;
+}
+
+.graph-element {
+    position: absolute;
+}
+
+.node {
+    color: #b2b2b2;
+    background-color: rgba(25, 25, 25, 1);
+    position: absolute;
+    border-radius: 6px;
+    border-width: 1px 1px 1px 1px;
+    border-color: black;
+    min-width: 100px;
+}
+
+.node-selected {
+    border-color: rgba(68, 192, 255, 1);
+}
+
+.node-title {
+    flex-direction: row;
+    justify-content: space-between;
+    /*background-color: rgba(63, 63, 63, 0.804);*/
+    height: 28px;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+}
+
+.node-title-label {
+    color: rgba(193, 193, 193, 1);
+    font-size: 12px;
+    margin: 6px;
+    padding-left: 2px;
+    -unity-text-align: middle-left;
+}
+
+.node-io {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-color: black; 
+    background-color: rgba(25, 25, 25, 1);
+    justify-content: space-between;
+}
+
+.node-io-input {
+    flex-direction: column;
+    background-color: rgba(60, 60, 60, 0.804);
+    padding: 4px;
+}
+
+.node-io-output {
+    flex-direction: column;
+    background-color: rgba(46, 46, 46, 0.804);
+    padding: 4px;
+}
+
+.node-extension {
+    /*background-color: rgba(63, 63, 63, 0.804);*/
+    flex-direction: column;
+    padding-bottom: 5px;
+    border-bottom-left-radius: 6px;
+    border-bottom-right-radius: 6px;
+    padding-top: 5px;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+.port {
+    --port-color: rgba(240, 240, 255, 0.95);
+    --disabled-port-color: rgba(70, 70, 70, 0.27);
+    flex-grow: 0;
+}
+
+.port-input {
+    flex-direction: row-reverse;
+    margin-right: auto;
+}
+
+.port-output {
+    flex-direction: row;
+    margin-left: auto;
+}
+
+.port-label-container {
+    margin: 0px;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+.port-label {
+    color: #b2b2b2;
+    align-self: center;
+}
+
+.port-connector-box {
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: 0px;
+    margin-right: 0px;
+    width: 14px;
+    height: 14px;
+}
+
+.port-connector-cap {
+    flex-grow: 1;
+    border-radius: 100% 100% 100% 100%;
+    margin: 4px 4px 4px 4px;
+}
+
+.edge {
+    --edge-width: 2;
+    --edge-width-selected: 2;
+    --edge-color: rgba(146, 146, 146, 1);
+    --edge-color-selected: rgba(240, 240, 240, 1);
+    --layer: -10;
+    position: absolute;
+}
+
+.edge-cap {
+    border-radius: 100% 100% 100% 100%; /*12*/
+    width: 4px;
+    height: 4px;
+    background-color: rgba(146, 146, 146, 1);
+}
+
+.marquee {
+    position: absolute;
+    opacity: 0.25;
+}

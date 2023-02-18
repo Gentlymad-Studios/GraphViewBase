@@ -1,0 +1,20 @@
+{
+  "name": "com.gentlymad.graphviewbase",
+  "version": "0.0.1",
+  "displayName": "GraphViewBase",
+  "description": "The base for our NewGraph implementation. Avoids any reliance on the outdated Experimental Graph view form Unity. .",
+  "unity": "2022.2",
+  "documentationUrl": "https://github.com/Gentlymad-Studios/GraphViewBase/blob/master/README.md",
+  "changelogUrl": "https://github.com/Gentlymad-Studios/GraphViewBase/blob/master/CHANGELOG.md",
+  "licensesUrl": "https://github.com/Gentlymad-Studios/GraphViewBase/blob/master/LICENSE.md",
+ "keywords": [
+    "node",
+    "graph",
+    "network"
+  ],
+  "author": {
+    "name": "Gentlymad Studios",
+    "email": "m.guntrum@gentlymadstudios.com",
+    "url": "https://gentlymad.org"
+  }
+}
