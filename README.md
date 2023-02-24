@@ -8,4 +8,4 @@ The base for our [NewGraph](https://github.com/Gentlymad-Studios/NewGraph) node 
 
 This is a heavily modified version of: https://github.com/Sahasrara/GraphViewPlayer.
 
-~ Use at you own risk. ~
+~ Use at your own risk. ~
