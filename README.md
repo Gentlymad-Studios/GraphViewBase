@@ -7,3 +7,5 @@
 The base for our [NewGraph](https://github.com/Gentlymad-Studios/NewGraph) node framework. This removes any reliance on the outdated/deprecated Experimental Graph view form Unity.
 
 This is a heavily modified version of: https://github.com/Sahasrara/GraphViewPlayer.
+
+~ Use at you own risk. ~
