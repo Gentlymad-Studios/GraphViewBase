@@ -2,4 +2,4 @@ This package contains third-party software components:
 
 Component Name: GraphViewPlayer
 
-[GraphViewBase License](unkown)
+[GraphViewPlayer License](https://github.com/Sahasrara/GraphViewPlayer)
