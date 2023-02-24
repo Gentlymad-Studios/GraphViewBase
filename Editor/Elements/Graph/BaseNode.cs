@@ -2,7 +2,7 @@
 // Copyright (c) Unity Technologies. For terms of use, see
 // https://unity3d.com/legal/licenses/Unity_Reference_Only_License
 
-using System;
+//using System;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -106,9 +106,11 @@ namespace GraphViewBase {
         }
 
         private void OnDragOffer(DragOfferEvent e) {
+
             if (Graph != null && Graph.IsViewDrag(e)) {
                 Graph.OnDragOffer(e, true);
             } else {
+
                 // Check if this is a node drag event 
                 if (!IsNodeDrag(e) || !IsMovable()) {
                     return;
@@ -119,6 +121,7 @@ namespace GraphViewBase {
             }
         }
 
+        
         private bool IsNodeDrag<T>(DragAndDropEvent<T> e) where T : DragAndDropEvent<T>, new() {
             if ((MouseButton)e.button != MouseButton.LeftMouse) { return false; }
             if (!e.modifiers.IsNone()) { return false; }

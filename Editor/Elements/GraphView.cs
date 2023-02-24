@@ -117,6 +117,12 @@ namespace GraphViewBase {
         #region View Transform
         public delegate void ViewTransformChanged(GraphElementContainer contentContainer);
 
+        //public delegate void MouseUp(MouseUpEvent evt);
+        //public MouseUp OnMouseUp { get; set; }
+
+        //public delegate void MouseMove(MouseMoveEvent evt);
+        //public MouseMove OnMouseMove { get; set; }
+
         public void UpdateViewTransform(Vector3 newPosition)
             => UpdateViewTransform(newPosition, ViewTransform.scale);
 
@@ -266,19 +272,21 @@ namespace GraphViewBase {
         private readonly Marquee m_Marquee;
         private bool m_DraggingView;
         private bool m_DraggingMarquee;
-        private MouseMoveEvent latestMouseMoveEvent;
         public Vector2 mousePosition;
 
-        [EventInterest(typeof(MouseMoveEvent),typeof(DragOfferEvent), typeof(DragEvent), typeof(DragEndEvent), typeof(DragCancelEvent),
+        [EventInterest(typeof(MouseMoveEvent), /*typeof(MouseUpEvent),*/ typeof(DragOfferEvent), typeof(DragEvent), typeof(DragEndEvent), typeof(DragCancelEvent),
             typeof(DropEnterEvent), typeof(DropEvent), typeof(DropExitEvent))]
         protected override void ExecuteDefaultActionAtTarget(EventBase evt) {
             base.ExecuteDefaultActionAtTarget(evt);
             
             switch (evt.eventTypeId) {
                 case long v when v == MouseMoveEvent.TypeId():
-                    latestMouseMoveEvent = (MouseMoveEvent)evt;
-                    mousePosition = latestMouseMoveEvent.mousePosition;
+                    //OnMouseMove?.Invoke((MouseMoveEvent)evt);
+                    mousePosition = ((MouseMoveEvent)evt).mousePosition;
                     break;
+                /*case long v when v == MouseUpEvent.TypeId():
+                    OnMouseUp?.Invoke((MouseUpEvent)evt);
+                    break;*/
                 case long v when v == DragOfferEvent.TypeId():
                     OnDragOffer((DragOfferEvent)evt);
                     break;

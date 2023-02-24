@@ -109,23 +109,11 @@ namespace GraphViewBase {
 
             // Replace the drag acceptor
             e.AcceptDrag(this);
-            
-            /*
-            if(graphElement.GetType() == typeof(Edge)) {
 
-                BasePort basePort = (graphElement as Edge).GetOutputPort();
-                Debug.Log(basePort == null);
-                if (basePort != null && basePort.ParentNode != null) {
-                    basePort.ParentNode.Query().Children<ListView>().ForEach(list => {
-                        Debug.Log("listFound");
-                        list.ClearSelection();
-                        list.Blur();
-                    });
-                }
-            }*/
         }
 
         private void OnDragBegin(DragBeginEvent e) {
+
             // If we didn't accept a drag offer, exit. This should never happen
             if (m_Dragged == null) throw new("Unexpected drag begin event");
 
@@ -229,6 +217,7 @@ namespace GraphViewBase {
         }
 
         private void OnDragEnd(DragEndEvent e) {
+
             // Swallow event
             e.StopImmediatePropagation();
 
@@ -270,6 +259,7 @@ namespace GraphViewBase {
         }
 
         private void OnDragCancel(DragCancelEvent e) {
+
             // Swallow event
             e.StopImmediatePropagation();
 
