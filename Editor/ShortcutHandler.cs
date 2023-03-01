@@ -51,7 +51,7 @@ namespace GraphViewBase {
             }
 
 #if UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
-            AddSimpleAction(KeyCode.Z, Actions.Undo, isSystemControlKeyExclusive, new(isShiftAndCommand, callbacks[Actions.Redo]));
+            AddSimpleAction(KeyCode.Z, Actions.Undo, isSystemControlKeyExclusive, new(isShiftAndCommand, Actions.Redo));
             AddSimpleAction(KeyCode.Backspace, Actions.Delete, isCommandsAndFunctionKey);
 #else
             AddSimpleAction(KeyCode.Z, Actions.Undo, isSystemControlKeyExclusive);
