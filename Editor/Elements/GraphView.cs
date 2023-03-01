@@ -183,6 +183,7 @@ namespace GraphViewBase {
         }
 
         private void Pan() {
+
             // Use element center as the point to test against the bounds of the pan area
             Vector2 elementPositionWorld = m_PanElement.GetGlobalCenter();
 
@@ -353,7 +354,6 @@ namespace GraphViewBase {
                 m_Marquee.End = this.WorldToLocal(e.mousePosition);
             } else if (m_DraggingView) {
                 e.StopImmediatePropagation();
-
                 // TODO - MouseMoveEvent doesn't correctly report mouse button so I don't check IsViewDrag 
                 UpdateViewTransform(ViewTransform.position + (Vector3)e.mouseDelta);
             }
@@ -456,6 +456,7 @@ namespace GraphViewBase {
         }
 
         public bool IsViewDrag<T>(DragAndDropEvent<T> e) where T : DragAndDropEvent<T>, new() {
+            if (e.modifiers.HasFlag(EventModifiers.Alt)) { Debug.Log("view drag"); return true; }
             if ((MouseButton)e.button != MouseButton.MiddleMouse) { return false; }
             if (!e.modifiers.IsNone()) { return false; }
             return true;
@@ -464,7 +465,20 @@ namespace GraphViewBase {
 
         #region Keybinding
         protected override void ExecuteDefaultAction(EventBase baseEvent) {
+            /*
+            if (baseEvent is KeyUpEvent upEvt) {
+                if (currentlyHeldKeys.Contains(upEvt.keyCode)) {
+                    currentlyHeldKeys.Remove(upEvt.keyCode);
+                }
+                return;
+            }
+            */
             if (baseEvent is not KeyDownEvent evt) { return; }
+
+            /*
+            if (!currentlyHeldKeys.Contains(evt.keyCode)) {
+                currentlyHeldKeys.Add(evt.keyCode);
+            }*/
 
             if (panel.GetCapturingElement(PointerId.mousePointerId) != null) {
                 return;
@@ -476,6 +490,8 @@ namespace GraphViewBase {
             }
             OnActionExecuted(keyAction);
         }
+
+        //private HashSet<KeyCode> currentlyHeldKeys = new HashSet<KeyCode>();
         #endregion
 
         #region Add / Remove Elements from Heirarchy

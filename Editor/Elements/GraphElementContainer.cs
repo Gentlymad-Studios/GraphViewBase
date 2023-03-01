@@ -98,6 +98,7 @@ namespace GraphViewBase {
         public void RemoveFromDragSelection(GraphElement e) => m_Selection.Remove(e);
 
         private void OnDragOffer(DragOfferEvent e) {
+
             // Verify the target can handle the drag
             if (e.GetDraggedElement() is not GraphElement graphElement) { return; }
 

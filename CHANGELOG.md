@@ -17,3 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.0.3] - 2023-03-01
 ### Fixed
 - fixed bug in osx specific code regarding the ShortcutHandler
+
+## [0.0.4] - 2023-03-01
+### Added
+- Added ability to pan the view with alt/options key
