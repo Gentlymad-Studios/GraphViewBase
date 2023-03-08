@@ -218,7 +218,6 @@ namespace GraphViewBase {
         }
 
         private void OnDragEnd(DragEndEvent e) {
-
             // Swallow event
             e.StopImmediatePropagation();
 
@@ -246,10 +245,12 @@ namespace GraphViewBase {
         }
 
         private void HandleDragEnd(DragEndEvent e, BaseEdge draggedEdge) {
+            if (!draggedEdge.IsRealEdge()) {
+                draggedEdge.Disconnect();
+            }
 
             for (int i = 0; i < m_Selection.Count; i++) {
                 BaseEdge edge = (BaseEdge)m_Selection[i];
-
                 // Skip deleted edges 
                 // if (edge.parent == null) continue;
                 // Re-enable picking

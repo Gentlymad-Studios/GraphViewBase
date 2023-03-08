@@ -21,3 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.0.4] - 2023-03-01
 ### Added
 - Added ability to pan the view with alt/options key
+
+## [0.0.5] - 2023-03-08
+### Fixed
+- fixed bug that resulted in "filled" ports and hidden edges when edge dragging did not exceed the drag threshold
