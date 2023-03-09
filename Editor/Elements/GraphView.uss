@@ -96,6 +96,10 @@
     flex-grow: 0;
 }
 
+.port:hover .port-connector-cap{
+    background-color: rgb(240, 240, 240);
+}
+
 .port-input {
     flex-direction: row-reverse;
     margin-right: auto;

@@ -25,3 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.0.5] - 2023-03-08
 ### Fixed
 - fixed bug that resulted in "filled" ports and hidden edges when edge dragging did not exceed the drag threshold
+
+## [0.0.6] - 2023-03-09
+### Added
+- Added highlighting port when hovering over it
