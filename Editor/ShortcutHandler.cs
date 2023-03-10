@@ -65,18 +65,10 @@ namespace GraphViewBase {
             AddSimpleAction(KeyCode.F, Actions.Frame, isUnmodified);
         }
 
-        private bool frameProcessed = false;
 
-        public Actions Execute(KeyDownEvent evt) {
-            if (!frameProcessed && keyActions.ContainsKey(evt.keyCode)) {
-                frameProcessed = true;
-                if (evt.target != null) {
-                    // use the builtin scheduler to avoid processing on the same frame twice.
-                    (evt.target as VisualElement).schedule.Execute(() => frameProcessed = false);
-                } else {
-                    frameProcessed = false;
-                }
-                Actions actionType = keyActions[evt.keyCode].Execute(evt);
+        public Actions Execute(KeyCode keyCode, EventModifiers modifiers) {
+            if (keyActions.ContainsKey(keyCode)) {
+                Actions actionType = keyActions[keyCode].Execute(modifiers);
                 if (actionType != Actions.NoAction) {
                     return actionType;
                 }

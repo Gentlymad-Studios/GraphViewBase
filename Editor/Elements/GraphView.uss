@@ -63,19 +63,13 @@
     border-top-width: 1px;
     border-bottom-width: 1px;
     border-color: black; 
-    background-color: rgba(25, 25, 25, 1);
+    background-color: rgba(40, 40, 40, 1);
     justify-content: space-between;
 }
 
-.node-io-input {
+.node-io-input, .node-io-output {
     flex-direction: column;
-    background-color: rgba(60, 60, 60, 0.804);
-    padding: 4px;
-}
-
-.node-io-output {
-    flex-direction: column;
-    background-color: rgba(46, 46, 46, 0.804);
+    /*background-color: rgba(60, 60, 60, 0.804);*/
     padding: 4px;
 }
 

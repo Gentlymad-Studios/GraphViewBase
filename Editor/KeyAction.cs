@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.UIElements;
 using static GraphViewBase.ShortcutHandler;
 
 namespace GraphViewBase {
@@ -45,17 +44,17 @@ namespace GraphViewBase {
             displayName = $"{handler.actionType} ({displayCode + keyCode})";
         }
 
-        private Actions ExecuteBase(KeyDownEvent evt, Handler handler, Handler alternativeHandler = null) {
-            if (AreChecksValid(evt.modifiers, handler.checks)) {
+        private Actions ExecuteBase(EventModifiers modifiers, Handler handler, Handler alternativeHandler = null) {
+            if (AreChecksValid(modifiers, handler.checks)) {
                 return handler.actionType;
-            } else if (alternativeHandler != null && AreChecksValid(evt.modifiers, alternativeHandler.checks)) {
+            } else if (alternativeHandler != null && AreChecksValid(modifiers, alternativeHandler.checks)) {
                 return alternativeHandler.actionType;
             }
             return Actions.NoAction;
         }
 
-        public Actions Execute(KeyDownEvent evt) {
-            return ExecuteBase(evt, handler, altHandler);
+        public Actions Execute(EventModifiers modifiers) {
+            return ExecuteBase(modifiers, handler, altHandler);
         }
 
         private bool AreChecksValid(EventModifiers eventModifiers, SpecialKey[] checks) {

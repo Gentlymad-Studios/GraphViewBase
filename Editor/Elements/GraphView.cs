@@ -31,6 +31,7 @@ namespace GraphViewBase {
 
         #region Constructor
         protected GraphView() {
+
             //
             // GraphView - Level 0
             //
@@ -84,6 +85,7 @@ namespace GraphViewBase {
                 { Actions.Frame, Frame },
             };
         }
+
         #endregion
 
         #region Helper Classes
@@ -275,19 +277,15 @@ namespace GraphViewBase {
         private bool m_DraggingMarquee;
         public Vector2 mousePosition;
 
-        [EventInterest(typeof(MouseMoveEvent), /*typeof(MouseUpEvent),*/ typeof(DragOfferEvent), typeof(DragEvent), typeof(DragEndEvent), typeof(DragCancelEvent),
+        [EventInterest(typeof(MouseMoveEvent), typeof(DragOfferEvent), typeof(DragEvent), typeof(DragEndEvent), typeof(DragCancelEvent),
             typeof(DropEnterEvent), typeof(DropEvent), typeof(DropExitEvent))]
         protected override void ExecuteDefaultActionAtTarget(EventBase evt) {
             base.ExecuteDefaultActionAtTarget(evt);
             
             switch (evt.eventTypeId) {
                 case long v when v == MouseMoveEvent.TypeId():
-                    //OnMouseMove?.Invoke((MouseMoveEvent)evt);
                     mousePosition = ((MouseMoveEvent)evt).mousePosition;
                     break;
-                /*case long v when v == MouseUpEvent.TypeId():
-                    OnMouseUp?.Invoke((MouseUpEvent)evt);
-                    break;*/
                 case long v when v == DragOfferEvent.TypeId():
                     OnDragOffer((DragOfferEvent)evt);
                     break;
@@ -465,36 +463,25 @@ namespace GraphViewBase {
 
         #region Keybinding
         protected override void ExecuteDefaultAction(EventBase baseEvent) {
-            /*
-            if (baseEvent is KeyUpEvent upEvt) {
-                if (currentlyHeldKeys.Contains(upEvt.keyCode)) {
-                    currentlyHeldKeys.Remove(upEvt.keyCode);
-                }
-                return;
-            }
-            */
             if (baseEvent is not KeyDownEvent evt) { return; }
+            ExecuteShortcutHandler(evt.keyCode, evt.modifiers);
+        }
 
-            /*
-            if (!currentlyHeldKeys.Contains(evt.keyCode)) {
-                currentlyHeldKeys.Add(evt.keyCode);
-            }*/
-
+        protected void ExecuteShortcutHandler(KeyCode keyCode, EventModifiers modifiers) {
             if (panel.GetCapturingElement(PointerId.mousePointerId) != null) {
                 return;
             }
-            
-            Actions keyAction = shortcutHandler.Execute(evt);
+
+            Actions keyAction = shortcutHandler.Execute(keyCode, modifiers);
             if (internalActions.ContainsKey(keyAction)) {
                 internalActions[keyAction]();
             }
             OnActionExecuted(keyAction);
         }
 
-        //private HashSet<KeyCode> currentlyHeldKeys = new HashSet<KeyCode>();
         #endregion
 
-        #region Add / Remove Elements from Heirarchy
+        #region Add / Remove Elements from Hierarchy
         public void AddElement(GraphElement graphElement) {
             graphElement.Graph = this;
             GetLayer(graphElement.Layer).Add(graphElement);
