@@ -39,3 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.0.8] - 2023-03-10
 ### Added
 - Added EdgeDrop action, so it is possible to do stuff when an edge was dropped
+
+## [0.0.9] - 2023-03-10
+### Fixed
+- removed debug log

@@ -456,7 +456,7 @@ namespace GraphViewBase {
         }
 
         public bool IsViewDrag<T>(DragAndDropEvent<T> e) where T : DragAndDropEvent<T>, new() {
-            if (e.modifiers.HasFlag(EventModifiers.Alt)) { Debug.Log("view drag"); return true; }
+            if (e.modifiers.HasFlag(EventModifiers.Alt)) { /*Debug.Log("view drag");*/ return true; }
             if ((MouseButton)e.button != MouseButton.MiddleMouse) { return false; }
             if (!e.modifiers.IsNone()) { return false; }
             return true;
