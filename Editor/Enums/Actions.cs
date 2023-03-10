@@ -14,6 +14,7 @@ namespace GraphViewBase {
         EdgeDelete = 512,
         ViewPortChanged = 1024,
         SelectionChanged = 2048,
-        SelectionCleared = 4096
+        SelectionCleared = 4096,
+        EdgeDrop = 8192,
     }
 }

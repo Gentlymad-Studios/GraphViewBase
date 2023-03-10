@@ -429,10 +429,12 @@ namespace GraphViewBase {
                     BaseEdge edge = (BaseEdge)dropPayload.GetPayload()[i];
 
                     // Delete real edge
-                    if (edge.IsRealEdge()) { OnActionExecuted(Actions.EdgeDelete, edge); }
-
-                    // Delete candidate edge
-                    else { RemoveElement(edge); }
+                    if (edge.IsRealEdge()) {
+                        OnActionExecuted(Actions.EdgeDelete, edge);
+                    }else {
+                        OnActionExecuted(Actions.EdgeDrop, edge);
+                        RemoveElement(edge);
+                    }
                 }
             }
         }
