@@ -63,6 +63,7 @@ namespace GraphViewBase {
             AddSimpleAction(KeyCode.D, Actions.Duplicate, isSystemControlKeyExclusive);
             AddSimpleAction(KeyCode.Delete, Actions.Delete, isFunctionKey);
             AddSimpleAction(KeyCode.F, Actions.Frame, isUnmodified);
+            AddSimpleAction(KeyCode.F2, Actions.Rename, isFunctionKey);
         }
 
 

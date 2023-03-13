@@ -16,5 +16,6 @@ namespace GraphViewBase {
         SelectionChanged = 2048,
         SelectionCleared = 4096,
         EdgeDrop = 8192,
+        Rename = 16384,
     }
 }
