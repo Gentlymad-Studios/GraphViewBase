@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -107,6 +108,9 @@ namespace GraphViewBase {
         public ViewTransformChanged OnViewTransformChanged { get; set; }
         protected internal GraphElementContainer ContentContainer { get; }
         internal ITransform ViewTransform => ContentContainer.transform;
+        
+        public bool IsFocusedElementNullOrNotBindable => focusController == null || focusController.focusedElement == null || !(focusController.focusedElement is IBindable);
+
         #endregion
 
         #region Factories
@@ -469,8 +473,9 @@ namespace GraphViewBase {
             ExecuteShortcutHandler(evt.keyCode, evt.modifiers);
         }
 
+
         protected void ExecuteShortcutHandler(KeyCode keyCode, EventModifiers modifiers) {
-            if (panel.GetCapturingElement(PointerId.mousePointerId) != null) {
+            if (panel.GetCapturingElement(PointerId.mousePointerId) != null ) {
                 return;
             }
 
@@ -514,52 +519,54 @@ namespace GraphViewBase {
 
         #region Framing
         protected void Frame() {
-            // Construct rect for selected and unselected elements
-            Rect rectToFitSelected = ContentContainer.layout;
-            Rect rectToFitUnselected = rectToFitSelected;
-            bool reachedFirstSelected = false;
-            bool reachedFirstUnselected = false;
-            foreach (GraphElement ge in ContentContainer.ElementsAll) {
-                // TODO: edge control is the VisualElement with actual dimensions
-                // VisualElement ve = ge is BaseEdge edge ? edge.EdgeControl : ge;
-                if (ge.Selected) {
-                    if (!reachedFirstSelected) {
-                        rectToFitSelected = ge.ChangeCoordinatesTo(ContentContainer, ge.Rect());
-                        reachedFirstSelected = true;
-                    } else {
-                        rectToFitSelected = RectUtils.Encompass(rectToFitSelected,
-                            ge.ChangeCoordinatesTo(ContentContainer, ge.Rect()));
-                    }
-                } else if (!reachedFirstSelected) // Don't bother if we already have at least one selected item
-                  {
-                    if (!reachedFirstUnselected) {
-                        rectToFitUnselected = ge.ChangeCoordinatesTo(ContentContainer, ge.Rect());
-                        reachedFirstUnselected = true;
-                    } else {
-                        rectToFitUnselected = RectUtils.Encompass(rectToFitUnselected,
-                            ge.ChangeCoordinatesTo(ContentContainer, ge.Rect()));
+            if (IsFocusedElementNullOrNotBindable) {
+                // Construct rect for selected and unselected elements
+                Rect rectToFitSelected = ContentContainer.layout;
+                Rect rectToFitUnselected = rectToFitSelected;
+                bool reachedFirstSelected = false;
+                bool reachedFirstUnselected = false;
+                foreach (GraphElement ge in ContentContainer.ElementsAll) {
+                    // TODO: edge control is the VisualElement with actual dimensions
+                    // VisualElement ve = ge is BaseEdge edge ? edge.EdgeControl : ge;
+                    if (ge.Selected) {
+                        if (!reachedFirstSelected) {
+                            rectToFitSelected = ge.ChangeCoordinatesTo(ContentContainer, ge.Rect());
+                            reachedFirstSelected = true;
+                        } else {
+                            rectToFitSelected = RectUtils.Encompass(rectToFitSelected,
+                                ge.ChangeCoordinatesTo(ContentContainer, ge.Rect()));
+                        }
+                    } else if (!reachedFirstSelected) // Don't bother if we already have at least one selected item
+                      {
+                        if (!reachedFirstUnselected) {
+                            rectToFitUnselected = ge.ChangeCoordinatesTo(ContentContainer, ge.Rect());
+                            reachedFirstUnselected = true;
+                        } else {
+                            rectToFitUnselected = RectUtils.Encompass(rectToFitUnselected,
+                                ge.ChangeCoordinatesTo(ContentContainer, ge.Rect()));
+                        }
                     }
                 }
-            }
 
-            // Use selection only if possible, otherwise unselected. Failing both, use original content container rect
-            Vector3 frameScaling;
-            Vector3 frameTranslation;
-            if (reachedFirstSelected) {
-                CalculateFrameTransform(rectToFitSelected, layout, k_FrameBorder, out frameTranslation,
-                    out frameScaling);
-            } else if (reachedFirstUnselected) {
-                CalculateFrameTransform(rectToFitUnselected, layout, k_FrameBorder, out frameTranslation,
-                    out frameScaling);
-            } else {
-                // Note: rectToFitSelected will just be the container rect
-                CalculateFrameTransform(rectToFitSelected, layout, k_FrameBorder, out frameTranslation,
-                    out frameScaling);
-            }
+                // Use selection only if possible, otherwise unselected. Failing both, use original content container rect
+                Vector3 frameScaling;
+                Vector3 frameTranslation;
+                if (reachedFirstSelected) {
+                    CalculateFrameTransform(rectToFitSelected, layout, k_FrameBorder, out frameTranslation,
+                        out frameScaling);
+                } else if (reachedFirstUnselected) {
+                    CalculateFrameTransform(rectToFitUnselected, layout, k_FrameBorder, out frameTranslation,
+                        out frameScaling);
+                } else {
+                    // Note: rectToFitSelected will just be the container rect
+                    CalculateFrameTransform(rectToFitSelected, layout, k_FrameBorder, out frameTranslation,
+                        out frameScaling);
+                }
 
-            // Update transform
-            Matrix4x4.TRS(frameTranslation, Quaternion.identity, frameScaling);
-            UpdateViewTransform(frameTranslation, frameScaling);
+                // Update transform
+                Matrix4x4.TRS(frameTranslation, Quaternion.identity, frameScaling);
+                UpdateViewTransform(frameTranslation, frameScaling);
+            }
         }
 
         private float ZoomRequiredToFrameRect(Rect rectToFit, Rect clientRect, int border) {
