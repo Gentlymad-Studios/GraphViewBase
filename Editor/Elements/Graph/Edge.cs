@@ -10,9 +10,7 @@ namespace GraphViewBase {
         private const float k_EndPointRadius = 4.0f;
         private const float k_InterceptWidth = 6.0f;
         private const float k_EdgeLengthFromPort = 12.0f;
-        private const float k_EdgeTurnDiameter = 16.0f;
-        private const float k_EdgeSweepResampleRatio = 4.0f;
-        private const int k_EdgeStraightLineSegmentDivisor = 5;
+        private const float k_EdgeTurnDiameter = 20.0f;
         private const int k_DefaultEdgeWidth = 2;
         private const int k_DefaultEdgeWidthSelected = 2;
         private static readonly Color s_DefaultSelectedColor = new(240 / 255f, 240 / 255f, 240 / 255f);
@@ -227,268 +225,81 @@ namespace GraphViewBase {
             MarkDirtyRepaint();
         }
 
-        private void RenderStraightLines(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4) {
-            float safeSpan = OutputOrientation == Orientation.Horizontal
-                ? Mathf.Abs(p1.x + k_EdgeLengthFromPort - (p4.x - k_EdgeLengthFromPort))
-                : Mathf.Abs(p1.y + k_EdgeLengthFromPort - (p4.y - k_EdgeLengthFromPort));
-
-            float safeSpan3 = safeSpan / k_EdgeStraightLineSegmentDivisor;
-            float nodeToP2Dist = Mathf.Min(safeSpan3, k_EdgeTurnDiameter);
-            nodeToP2Dist = Mathf.Max(0, nodeToP2Dist);
-
-            Vector2 offset = OutputOrientation == Orientation.Horizontal
-                ? new(k_EdgeTurnDiameter - nodeToP2Dist, 0)
-                : new Vector2(0, k_EdgeTurnDiameter - nodeToP2Dist);
-
-            m_RenderPoints.Add(p1);
-            m_RenderPoints.Add(p2 - offset);
-            m_RenderPoints.Add(p3 + offset);
-            m_RenderPoints.Add(p4);
-        }
-
         protected virtual void UpdateRenderPoints() {
             ComputeControlPoints(); // This should have been updated before : make sure anyway.
 
-            if (m_RenderPointsDirty == false && ControlPoints != null) { return; }
+            if (m_RenderPointsDirty == false && ControlPoints != null) return;
+            if(ControlPoints == null) return;
 
-            Vector2 p1 = Graph.ContentContainer.ChangeCoordinatesTo(this, ControlPoints[0]);
-            Vector2 p2 = Graph.ContentContainer.ChangeCoordinatesTo(this, ControlPoints[1]);
-            Vector2 p3 = Graph.ContentContainer.ChangeCoordinatesTo(this, ControlPoints[2]);
-            Vector2 p4 = Graph.ContentContainer.ChangeCoordinatesTo(this, ControlPoints[3]);
+            Vector2[] points = new Vector2[ControlPoints.Length];
+            for (int i = 0; i < ControlPoints.Length; i++)
+                points[i] = Graph.ContentContainer.ChangeCoordinatesTo(this, ControlPoints[i]);;
 
             // Only compute this when the "local" points have actually changed
-            if (m_LastLocalControlPoints.Count == 4) {
-                if (Approximately(p1, m_LastLocalControlPoints[0]) &&
-                    Approximately(p2, m_LastLocalControlPoints[1]) &&
-                    Approximately(p3, m_LastLocalControlPoints[2]) &&
-                    Approximately(p4, m_LastLocalControlPoints[3])) {
-                    m_RenderPointsDirty = false;
-                    return;
+            if (m_LastLocalControlPoints.Count == ControlPoints.Length) {
+                bool changed = false;
+                for (int i = 0; i < points.Length; i++)
+                {
+                    if (m_LastLocalControlPoints[i] == points[i]) continue;
+                    changed = true;
+                    break;
                 }
+                m_RenderPointsDirty = changed;
+                if(!changed) return;
             }
-
+            
             Profiler.BeginSample("EdgeControl.UpdateRenderPoints");
             m_LastLocalControlPoints.Clear();
-            m_LastLocalControlPoints.Add(p1);
-            m_LastLocalControlPoints.Add(p2);
-            m_LastLocalControlPoints.Add(p3);
-            m_LastLocalControlPoints.Add(p4);
-            m_RenderPointsDirty = false;
+            foreach (var point in points)
+                m_LastLocalControlPoints.Add(point);
 
+            m_RenderPointsDirty = false;
             m_RenderPoints.Clear();
 
-            float diameter = k_EdgeTurnDiameter;
+            m_RenderPoints.Add(points[0]);
 
-            // We have to handle a special case of the edge when it is a straight line, but not
-            // when going backwards in space (where the start point is in front in y to the end point).
-            // We do this by turning the line into 3 linear segments with no curves. This also
-            // avoids possible NANs in later angle calculations.
-            bool sameOrientations = OutputOrientation == InputOrientation;
-            if (sameOrientations &&
-                ((OutputOrientation == Orientation.Horizontal && Mathf.Abs(p1.y - p4.y) < 2 &&
-                  p1.x + k_EdgeLengthFromPort < p4.x - k_EdgeLengthFromPort) ||
-                 (OutputOrientation == Orientation.Vertical && Mathf.Abs(p1.x - p4.x) < 2 &&
-                  p1.y + k_EdgeLengthFromPort < p4.y - k_EdgeLengthFromPort))) {
-                RenderStraightLines(p1, p2, p3, p4);
-                Profiler.EndSample();
-                return;
-            }
-
-            bool renderBothCorners = true;
-
-            EdgeCornerSweepValues corner1 = GetCornerSweepValues(p1, p2, p3, diameter, Direction.Output);
-            EdgeCornerSweepValues corner2 = GetCornerSweepValues(p2, p3, p4, diameter, Direction.Input);
-
-            if (!ValidateCornerSweepValues(ref corner1, ref corner2)) {
-                if (sameOrientations) {
-                    RenderStraightLines(p1, p2, p3, p4);
-                    Profiler.EndSample();
-                    return;
-                }
-
-                renderBothCorners = false;
-
-                //we try to do it with a single corner instead
-                Vector2 px = OutputOrientation == Orientation.Horizontal ? new(p4.x, p1.y) : new Vector2(p1.x, p4.y);
-
-                corner1 = GetCornerSweepValues(p1, px, p4, diameter, Direction.Output);
-            }
-
-            m_RenderPoints.Add(p1);
-
-            if (!sameOrientations && renderBothCorners) {
-                //if the 2 corners or endpoints are too close, the corner sweep angle calculations can't handle different orientations
-                float minDistance = 2 * diameter * diameter;
-                if ((p3 - p2).sqrMagnitude < minDistance ||
-                    (p4 - p1).sqrMagnitude < minDistance) {
-                    Vector2 px = (p2 + p3) * 0.5f;
-                    corner1 = GetCornerSweepValues(p1, px, p4, diameter, Direction.Output);
-                    renderBothCorners = false;
-                }
-            }
-
-            GetRoundedCornerPoints(m_RenderPoints, corner1, Direction.Output);
-            if (renderBothCorners) { GetRoundedCornerPoints(m_RenderPoints, corner2, Direction.Input); }
-
-            m_RenderPoints.Add(p4);
+            for (int i = 0; i < points.Length - 2; i++)
+                m_RenderPoints.AddRange(GetRoundedCornerPoints(points[i], points[i+1], points[i+2]));
+                
+            
+            m_RenderPoints.Add(points[^1]);
             Profiler.EndSample();
         }
 
-        private bool ValidateCornerSweepValues(ref EdgeCornerSweepValues corner1, ref EdgeCornerSweepValues corner2) {
-            // Get the midpoint between the two corner circle centers.
-            Vector2 circlesMidpoint = (corner1.circleCenter + corner2.circleCenter) / 2;
+        private Vector2[] GetRoundedCornerPoints(Vector2 point1, Vector2 cornerPoint, Vector2 point2)
+        {
+            // Calculate the direction vectors from the corner point to the start and end points.
+            Vector2 direction1 = (point1 - cornerPoint).normalized;
+            Vector2 direction2 = (point2 - cornerPoint).normalized;
 
-            // Find the angle to the corner circles midpoint so we can compare it to the sweep angles of each corner.
-            Vector2 p2CenterToCross1 = corner1.circleCenter - corner1.crossPoint1;
-            Vector2 p2CenterToCirclesMid = corner1.circleCenter - circlesMidpoint;
-            double angleToCirclesMid = OutputOrientation == Orientation.Horizontal
-                ? Math.Atan2(p2CenterToCross1.y, p2CenterToCross1.x) -
-                  Math.Atan2(p2CenterToCirclesMid.y, p2CenterToCirclesMid.x)
-                : Math.Atan2(p2CenterToCross1.x, p2CenterToCross1.y) -
-                  Math.Atan2(p2CenterToCirclesMid.x, p2CenterToCirclesMid.y);
+            // Calculate the angle between the two edges.
+            float angle = Vector2.Angle(direction1, direction2);
 
-            if (double.IsNaN(angleToCirclesMid)) { return false; }
+            // Adjust the edge turn diameter based on the angle.
+            float adjustedEdgeTurnDiameter = k_EdgeTurnDiameter * Mathf.Sin(Mathf.Deg2Rad * angle / 2);
 
-            // We need the angle to the circles midpoint to match the turn direction of the first corner's sweep angle.
-            angleToCirclesMid = Math.Sign(angleToCirclesMid) * 2 * Mathf.PI - angleToCirclesMid;
-            if (Mathf.Abs((float)angleToCirclesMid) > 1.5 * Mathf.PI) {
-                angleToCirclesMid = -1 * Math.Sign(angleToCirclesMid) * 2 * Mathf.PI + angleToCirclesMid;
+            // Calculate the distances from the corner point to the start and end points.
+            float distance1 = Vector2.Distance(point1, cornerPoint);
+            float distance2 = Vector2.Distance(point2, cornerPoint);
+
+            // Adjust the start and end points based on the adjusted edge turn diameter, but do not exceed the original distances.
+            Vector2 adjustedPoint1 = cornerPoint + direction1 * Mathf.Min(adjustedEdgeTurnDiameter, distance1);
+            Vector2 adjustedPoint2 = cornerPoint + direction2 * Mathf.Min(adjustedEdgeTurnDiameter, distance2);
+
+            // The number of points to generate along the curve.
+            int numPoints = Mathf.RoundToInt(adjustedEdgeTurnDiameter * 10); // Adjust this as needed.
+
+            Vector2[] curvePoints = new Vector2[numPoints];
+
+            for (int i = 0; i < numPoints; i++)
+            {
+                float t = i / (float)(numPoints - 1); // Normalized parameter along the curve.
+
+                // Calculate the coordinates of the point on the curve at parameter t using the quadratic Bezier curve formula.
+                curvePoints[i] = (1 - t) * (1 - t) * adjustedPoint1 + 2 * (1 - t) * t * cornerPoint + t * t * adjustedPoint2;
             }
 
-            // Calculate the maximum sweep angle so that both corner sweeps and with the tangents of the 2 circles meeting each other.
-            float h = p2CenterToCirclesMid.magnitude;
-            float p2AngleToMidTangent = Mathf.Acos(corner1.radius / h);
-
-            if (double.IsNaN(p2AngleToMidTangent)) { return false; }
-
-            float maxSweepAngle = Mathf.Abs((float)corner1.sweepAngle) - p2AngleToMidTangent * 2;
-
-            // If the angle to the circles midpoint is within the sweep angle, we need to apply our maximum sweep angle
-            // calculated above, otherwise the maximum sweep angle is irrelevant.
-            if (Mathf.Abs((float)angleToCirclesMid) < Mathf.Abs((float)corner1.sweepAngle)) {
-                corner1.sweepAngle = Math.Sign(corner1.sweepAngle) *
-                                     Mathf.Min(maxSweepAngle, Mathf.Abs((float)corner1.sweepAngle));
-                corner2.sweepAngle = Math.Sign(corner2.sweepAngle) *
-                                     Mathf.Min(maxSweepAngle, Mathf.Abs((float)corner2.sweepAngle));
-            }
-
-            return true;
-        }
-
-        private EdgeCornerSweepValues GetCornerSweepValues(
-            Vector2 p1, Vector2 cornerPoint, Vector2 p2, float diameter, Direction closestPortDirection) {
-            EdgeCornerSweepValues corner = new();
-
-            // Calculate initial radius. This radius can change depending on the sharpness of the corner.
-            corner.radius = diameter / 2;
-
-            // Calculate vectors from p1 to cornerPoint.
-            Vector2 d1Corner = (cornerPoint - p1).normalized;
-            Vector2 d1 = d1Corner * diameter;
-            float dx1 = d1.x;
-            float dy1 = d1.y;
-
-            // Calculate vectors from p2 to cornerPoint.
-            Vector2 d2Corner = (cornerPoint - p2).normalized;
-            Vector2 d2 = d2Corner * diameter;
-            float dx2 = d2.x;
-            float dy2 = d2.y;
-
-            // Calculate the angle of the corner (divided by 2).
-            float angle = (float)(Math.Atan2(dy1, dx1) - Math.Atan2(dy2, dx2)) / 2;
-
-            // Calculate the length of the segment between the cornerPoint and where
-            // the corner circle with given radius meets the line.
-            float tan = (float)Math.Abs(Math.Tan(angle));
-            float segment = corner.radius / tan;
-
-            // If the segment is larger than the diameter, we need to cap the segment
-            // to the diameter and reduce the radius to match the segment. This is what
-            // makes the corner turn radii get smaller as the edge corners get tighter.
-            if (segment > diameter) {
-                segment = diameter;
-                corner.radius = diameter * tan;
-            }
-
-            // Calculate both cross points (where the circle touches the p1-cornerPoint line
-            // and the p2-cornerPoint line).
-            corner.crossPoint1 = cornerPoint - d1Corner * segment;
-            corner.crossPoint2 = cornerPoint - d2Corner * segment;
-
-            // Calculation of the coordinates of the circle center.
-            corner.circleCenter = GetCornerCircleCenter(cornerPoint, corner.crossPoint1, corner.crossPoint2, segment,
-                corner.radius);
-
-            // Calculate the starting and ending angles.
-            corner.startAngle = Math.Atan2(corner.crossPoint1.y - corner.circleCenter.y,
-                corner.crossPoint1.x - corner.circleCenter.x);
-            corner.endAngle = Math.Atan2(corner.crossPoint2.y - corner.circleCenter.y,
-                corner.crossPoint2.x - corner.circleCenter.x);
-
-            // Get the full sweep angle from the starting and ending angles.
-            corner.sweepAngle = corner.endAngle - corner.startAngle;
-
-            // If we are computing the second corner (into the input port), we want to start
-            // the sweep going backwards.
-            if (closestPortDirection == Direction.Input) {
-                (corner.endAngle, corner.startAngle) = (corner.startAngle, corner.endAngle);
-            }
-
-            // Validate the sweep angle so it turns into the correct direction.
-            if (corner.sweepAngle > Math.PI) { corner.sweepAngle = -2 * Math.PI + corner.sweepAngle; } else if (corner.sweepAngle < -Math.PI) { corner.sweepAngle = 2 * Math.PI + corner.sweepAngle; }
-
-            return corner;
-        }
-
-        private Vector2 GetCornerCircleCenter(Vector2 cornerPoint, Vector2 crossPoint1, Vector2 crossPoint2,
-            float segment, float radius) {
-            float dx = cornerPoint.x * 2 - crossPoint1.x - crossPoint2.x;
-            float dy = cornerPoint.y * 2 - crossPoint1.y - crossPoint2.y;
-
-            Vector2 cornerToCenterVector = new(dx, dy);
-
-            float L = cornerToCenterVector.magnitude;
-
-            if (Mathf.Approximately(L, 0)) { return cornerPoint; }
-
-            float d = new Vector2(segment, radius).magnitude;
-            float factor = d / L;
-
-            return new(cornerPoint.x - cornerToCenterVector.x * factor,
-                cornerPoint.y - cornerToCenterVector.y * factor);
-        }
-
-        private void GetRoundedCornerPoints(List<Vector2> points, EdgeCornerSweepValues corner,
-            Direction closestPortDirection) {
-            // Calculate the number of points that will sample the arc from the sweep angle.
-            int pointsCount = Mathf.CeilToInt((float)Math.Abs(corner.sweepAngle * k_EdgeSweepResampleRatio));
-            int sign = Math.Sign(corner.sweepAngle);
-            bool backwards = closestPortDirection == Direction.Input;
-
-            for (int i = 0; i < pointsCount; ++i) {
-                // If we are computing the second corner (into the input port), the sweep is going backwards
-                // but we still need to add the points to the list in the correct order.
-                float sweepIndex = backwards ? i - pointsCount : i;
-
-                double sweepedAngle = corner.startAngle + sign * sweepIndex / k_EdgeSweepResampleRatio;
-
-                float pointX = (float)(corner.circleCenter.x + Math.Cos(sweepedAngle) * corner.radius);
-                float pointY = (float)(corner.circleCenter.y + Math.Sin(sweepedAngle) * corner.radius);
-
-                // Check if we overlap the previous point. If we do, we skip this point so that we
-                // don't cause the edge polygons to twist.
-                if (i == 0 && backwards) {
-                    if (OutputOrientation == Orientation.Horizontal) {
-                        if (corner.sweepAngle < 0 && points[^1].y > pointY) { continue; }
-                        if (corner.sweepAngle >= 0 && points[^1].y < pointY) { continue; }
-                    } else {
-                        if (corner.sweepAngle < 0 && points[^1].x < pointX) { continue; }
-                        if (corner.sweepAngle >= 0 && points[^1].x > pointX) { continue; }
-                    }
-                }
-
-                points.Add(new(pointX, pointY));
-            }
+            return curvePoints;
         }
 
         private void AssignControlPoint(ref Vector2 destination, Vector2 newValue) {
@@ -498,33 +309,56 @@ namespace GraphViewBase {
             }
         }
 
-        protected virtual void ComputeControlPoints() {
-            if (m_ControlPointsDirty == false) { return; }
-
-            Profiler.BeginSample("EdgeControl.ComputeControlPoints");
-
+        protected float GetOffset()
+        {
             float offset = k_EdgeLengthFromPort + k_EdgeTurnDiameter;
-
             // This is to ensure we don't have the edge extending
             // left and right by the offset right when the `from`
             // and `to` are on top of each other.
             float fromToDistance = (To - From).magnitude;
             offset = Mathf.Min(offset, fromToDistance * 2);
-            offset = Mathf.Max(offset, k_EdgeTurnDiameter);
+            return Mathf.Max(offset, k_EdgeTurnDiameter);
+    } 
+        
+        protected bool IsReverse()
+        {
+            float offset = GetOffset();
+            float fromX = OutputOrientation == Orientation.Horizontal ? From.x + offset : From.x;
+            float toX = InputOrientation == Orientation.Horizontal ? To.x - offset : To.x;
+            return fromX > toX;
+        }
 
-            if (ControlPoints == null || ControlPoints.Length != 4) { ControlPoints = new Vector2[4]; }
+        protected virtual void ComputeControlPoints() {
+            if (m_ControlPointsDirty == false) { return; }
 
+            Profiler.BeginSample("EdgeControl.ComputeControlPoints");
+            
+            float offset = GetOffset();
+            bool isReverse = IsReverse();
+            int numberOfControlPoints = isReverse ? 6 : 4;
+
+            if (ControlPoints == null || ControlPoints.Length != numberOfControlPoints) { ControlPoints = new Vector2[numberOfControlPoints]; }
+
+            //Assign Start and End Point
             AssignControlPoint(ref ControlPoints[0], From);
+            AssignControlPoint(ref ControlPoints[^1], To);
+            
+            //Assign Offset Points
+            float fromX = OutputOrientation == Orientation.Horizontal ? From.x + offset : From.x;
+            float fromY = OutputOrientation == Orientation.Horizontal ?  From.y : From.y + offset;
+            float toX = InputOrientation == Orientation.Horizontal ? To.x - offset : To.x;
+            float toY = InputOrientation == Orientation.Horizontal ? To.y : To.y - offset;
+            AssignControlPoint(ref ControlPoints[1], new(fromX, fromY));
+            AssignControlPoint(ref ControlPoints[^2], new(toX, toY));
 
-            if (OutputOrientation == Orientation.Horizontal) {
-                AssignControlPoint(ref ControlPoints[1], new(From.x + offset, From.y));
-            } else { AssignControlPoint(ref ControlPoints[1], new(From.x, From.y + offset)); }
+            //Assign Middle Points
+            if (isReverse)
+            {
+                float middleY = (From.y + To.y) / 2;
+                AssignControlPoint(ref ControlPoints[2], new(fromX, middleY));
+                AssignControlPoint(ref ControlPoints[3], new(toX, middleY));
+            }
 
-            if (InputOrientation == Orientation.Horizontal) {
-                AssignControlPoint(ref ControlPoints[2], new(To.x - offset, To.y));
-            } else { AssignControlPoint(ref ControlPoints[2], new(To.x, To.y - offset)); }
-
-            AssignControlPoint(ref ControlPoints[3], To);
             Profiler.EndSample();
         }
 
@@ -536,14 +370,14 @@ namespace GraphViewBase {
             Rect rect = new(Vector2.Min(to, from), new(Mathf.Abs(from.x - to.x), Mathf.Abs(from.y - to.y)));
 
             // Make sure any control points (including tangents, are included in the rect)
-            for (int i = 1; i < ControlPoints.Length - 1; ++i) {
-                if (!rect.Contains(ControlPoints[i])) {
-                    Vector2 pt = ControlPoints[i];
-                    rect.xMin = Math.Min(rect.xMin, pt.x);
-                    rect.yMin = Math.Min(rect.yMin, pt.y);
-                    rect.xMax = Math.Max(rect.xMax, pt.x);
-                    rect.yMax = Math.Max(rect.yMax, pt.y);
-                }
+            for (int i = 1; i < ControlPoints.Length - 1; ++i)
+            {
+                if (rect.Contains(ControlPoints[i])) continue;
+                Vector2 pt = ControlPoints[i];
+                rect.xMin = Math.Min(rect.xMin, pt.x);
+                rect.yMin = Math.Min(rect.yMin, pt.y);
+                rect.xMax = Math.Max(rect.xMax, pt.x);
+                rect.yMax = Math.Max(rect.yMax, pt.y);
             }
 
             //Make sure that we have the place to display Edges with EdgeControl.k_MinEdgeWidth at the lowest level of zoom.
@@ -674,6 +508,7 @@ namespace GraphViewBase {
         protected override void OnRemovedFromGraphView() {
             base.OnRemovedFromGraphView();
             Graph.OnViewTransformChanged -= MarkDirtyOnTransformChanged;
+            UpdateEdgeCaps();
         }
 
         private void MarkDirtyOnTransformChanged(GraphElementContainer contentContainer) { MarkDirtyRepaint(); }
