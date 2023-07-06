@@ -282,6 +282,9 @@ namespace GraphViewBase {
             float distance1 = Vector2.Distance(point1, cornerPoint);
             float distance2 = Vector2.Distance(point2, cornerPoint);
 
+            distance1 = Mathf.Pow(distance1 / 10, 2f) * 1.9f;
+            distance2 = Mathf.Pow(distance2 / 10, 2f) * 1.9f;
+
             // Adjust the start and end points based on the adjusted edge turn diameter, but do not exceed the original distances.
             Vector2 adjustedPoint1 = cornerPoint + direction1 * Mathf.Min(adjustedEdgeTurnDiameter, distance1);
             Vector2 adjustedPoint2 = cornerPoint + direction2 * Mathf.Min(adjustedEdgeTurnDiameter, distance2);
