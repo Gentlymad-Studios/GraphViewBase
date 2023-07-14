@@ -319,9 +319,8 @@ namespace GraphViewBase {
             // left and right by the offset right when the `from`
             // and `to` are on top of each other.
             float fromToDistance = (To - From).magnitude;
-            offset = Mathf.Min(offset, fromToDistance * 2);
-            return Mathf.Max(offset, k_EdgeTurnDiameter);
-    } 
+            return Mathf.Clamp(offset, k_EdgeTurnDiameter, fromToDistance * 2);
+        } 
         
         protected bool IsReverse()
         {
@@ -357,7 +356,21 @@ namespace GraphViewBase {
             //Assign Middle Points
             if (isReverse)
             {
-                float middleY = (From.y + To.y) / 2;
+                float startHeight = From.y;
+                float endHeight = To.y;
+                float middleY = (startHeight + endHeight) / 2;
+                if (GetInputPort() != null && GetOutputPort() != null)
+                {
+                    VisualElement highestPort = GetInputPort().GetPosition().y > GetOutputPort().GetPosition().y ? GetInputPort() : GetOutputPort();
+                    VisualElement lowestPort = highestPort == GetInputPort() ? GetOutputPort() : GetInputPort();
+                    GraphElement highestNode = (GraphElement) highestPort.parent.parent.parent;
+                    GraphElement lowestNode = (GraphElement) lowestPort.parent.parent.parent;
+                    middleY = (highestNode.GetPosition().y + highestNode.resolvedStyle.height + lowestNode.GetPosition().y) / 2;
+                    //middleY = Mathf.Clamp(middleY, float.MinValue, highestNode.GetPosition().y + highestNode.resolvedStyle.height + 20);
+                } 
+                
+                
+
                 AssignControlPoint(ref ControlPoints[2], new(fromX, middleY));
                 AssignControlPoint(ref ControlPoints[3], new(toX, middleY));
             }

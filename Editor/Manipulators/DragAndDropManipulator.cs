@@ -83,6 +83,7 @@ namespace GraphViewBase {
 
             // If the mouse isn't down, bail
             if (!m_MouseDown) { return; }
+            if(m_Dragged == null) { return; }
            
             // Check if dragged is still in the hierarchy
             if (m_Dragged.parent == null) {
