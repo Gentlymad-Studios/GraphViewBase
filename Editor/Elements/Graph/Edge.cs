@@ -315,11 +315,8 @@ namespace GraphViewBase {
         protected float GetOffset()
         {
             float offset = k_EdgeLengthFromPort + k_EdgeTurnDiameter;
-            // This is to ensure we don't have the edge extending
-            // left and right by the offset right when the `from`
-            // and `to` are on top of each other.
-            float fromToDistance = (To - From).magnitude;
-            return Mathf.Clamp(offset, k_EdgeTurnDiameter, fromToDistance * 2);
+            float distance = (To - From).magnitude;
+            return offset * Mathf.Clamp01(distance / 150f);
         } 
         
         protected bool IsReverse()
@@ -361,12 +358,13 @@ namespace GraphViewBase {
                 float middleY = (startHeight + endHeight) / 2;
                 if (GetInputPort() != null && GetOutputPort() != null)
                 {
-                    VisualElement highestPort = GetInputPort().GetPosition().y > GetOutputPort().GetPosition().y ? GetInputPort() : GetOutputPort();
+                    VisualElement highestPort = GetInputPort().GetGlobalCenter().y < GetOutputPort().GetGlobalCenter().y ? GetInputPort() : GetOutputPort();
                     VisualElement lowestPort = highestPort == GetInputPort() ? GetOutputPort() : GetInputPort();
                     GraphElement highestNode = (GraphElement) highestPort.parent.parent.parent;
                     GraphElement lowestNode = (GraphElement) lowestPort.parent.parent.parent;
                     middleY = (highestNode.GetPosition().y + highestNode.resolvedStyle.height + lowestNode.GetPosition().y) / 2;
-                    //middleY = Mathf.Clamp(middleY, float.MinValue, highestNode.GetPosition().y + highestNode.resolvedStyle.height + 20);
+                    //middleY = highestNode.GetPosition().y;
+                    middleY = Mathf.Clamp(middleY, highestNode.GetPosition().y + 20, lowestNode.GetPosition().y + 40);
                 } 
                 
                 
