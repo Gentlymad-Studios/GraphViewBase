@@ -53,5 +53,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed Frame action being triggerd while in an editable VisualElement.
 
 ## [0.1.2] - 2023-11-01
-### Add
+### Added
 - Added nicer line and connection drawing! Thanks to https://github.com/leissler and https://github.com/Saphirah for the work in their fork: https://github.com/leissler/GraphViewBase.
+
+## [0.1.3] - 2023-11-24
+### Fixed
+- Fixed invalid cast errors when using port lists and CommentGroupNodes (fixes: https://github.com/Gentlymad-Studios/NewGraph/issues/33), thanks to https://github.com/leissler for the pull request!
