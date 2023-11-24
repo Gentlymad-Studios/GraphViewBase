@@ -360,14 +360,13 @@ namespace GraphViewBase {
                 {
                     VisualElement highestPort = GetInputPort().GetGlobalCenter().y < GetOutputPort().GetGlobalCenter().y ? GetInputPort() : GetOutputPort();
                     VisualElement lowestPort = highestPort == GetInputPort() ? GetOutputPort() : GetInputPort();
-                    GraphElement highestNode = (GraphElement) highestPort.parent.parent.parent;
-                    GraphElement lowestNode = (GraphElement) lowestPort.parent.parent.parent;
-                    middleY = (highestNode.GetPosition().y + highestNode.resolvedStyle.height + lowestNode.GetPosition().y) / 2;
-                    //middleY = highestNode.GetPosition().y;
-                    middleY = Mathf.Clamp(middleY, highestNode.GetPosition().y + 20, lowestNode.GetPosition().y + 40);
+
+                    VisualElement highestNode = highestPort.GetFirstAncestorOfType<GraphElement>();
+                    VisualElement lowestNode = lowestPort.GetFirstAncestorOfType<GraphElement>();
+
+                    middleY = (highestNode.transform.position.y + highestNode.resolvedStyle.height + lowestNode.transform.position.y) / 2;
+                    middleY = Mathf.Clamp(middleY, highestNode.transform.position.y + 20, lowestNode.transform.position.y + 40);
                 } 
-                
-                
 
                 AssignControlPoint(ref ControlPoints[2], new(fromX, middleY));
                 AssignControlPoint(ref ControlPoints[3], new(toX, middleY));
