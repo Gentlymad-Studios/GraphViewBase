@@ -14,7 +14,6 @@ namespace GraphViewBase {
         private const float portCirclelineWidth = 1f;
 
         private static readonly Color s_DefaultColor = new(240 / 255f, 240 / 255f, 240 / 255f);
-        private static readonly Color s_DefaultDisabledColor = new(70 / 255f, 70 / 255f, 70 / 255f);
 
         public readonly HashSet<BaseEdge> m_Connections;
         protected VisualElement m_ConnectorBox;
@@ -66,6 +65,7 @@ namespace GraphViewBase {
             m_ConnectorBox.AddToClassList("port-connector-box");
             m_ConnectorBox.Add(m_ConnectorBoxCap);
             m_ConnectorBox.style.backgroundImage = new StyleBackground(PortCircleGraphics);
+            m_ConnectorBox.style.unityBackgroundImageTintColor = portColor;
 
             Add(m_ConnectorBox);
 
@@ -139,11 +139,18 @@ namespace GraphViewBase {
             get => portColor;
             set {
                 portColor = value;
-                UpdateCapColor();
+                CapColor = portColor;
+                m_ConnectorBox.style.unityBackgroundImageTintColor = portColor;
             }
         }
         public virtual Color DefaultPortColor { get; } = s_DefaultColor;
-        public virtual Color DisabledPortColor { get; } = s_DefaultDisabledColor;
+        public virtual Color DisabledPortColor {
+            get {
+                Color color = PortColor * 0.3f;
+                color.a = PortColor.a;
+                return color;
+            }
+        }
 
         public Orientation Orientation { get; }
         public PortCapacity Capacity { get; }
@@ -177,14 +184,14 @@ namespace GraphViewBase {
 
             if (!m_Connections.Contains(edge)) { m_Connections.Add(edge); }
 
-            UpdateCapColor();
+            UpdateCapVisiblity();
         }
 
         public virtual void Disconnect(BaseEdge edge) {
             if (edge == null) { throw new ArgumentException("The value passed to PortPresenter.Disconnect is null"); }
 
             m_Connections.Remove(edge);
-            UpdateCapColor();
+            UpdateCapVisiblity();
         }
 
         public virtual bool CanConnectToMore(bool ignoreCandidateEdges = true)
@@ -221,18 +228,15 @@ namespace GraphViewBase {
         #endregion
 
         #region Style
-        internal void UpdateCapColor() {
-            if (Connected()) { m_ConnectorBoxCap.style.backgroundColor = PortColor; } else { m_ConnectorBoxCap.style.backgroundColor = StyleKeyword.Null; }
+        internal void UpdateCapVisiblity() {
+            if (Connected()) { m_ConnectorBoxCap.style.opacity = 1; } else { m_ConnectorBoxCap.style.opacity = StyleKeyword.Null; }
         }
 
         private void UpdateConnectorColorAndEnabledState() {
             if (m_ConnectorBox == null) { return; }
 
             Color color = Highlight ? PortColor : DisabledPortColor;
-            m_ConnectorBox.style.borderLeftColor = color;
-            m_ConnectorBox.style.borderTopColor = color;
-            m_ConnectorBox.style.borderRightColor = color;
-            m_ConnectorBox.style.borderBottomColor = color;
+            m_ConnectorBox.style.unityBackgroundImageTintColor = color;
             m_ConnectorBox.SetEnabled(Highlight);
         }
 
@@ -298,8 +302,8 @@ namespace GraphViewBase {
                     return;
                 }
 
-                // But if it's compatible, light this port up 
-                m_ConnectorBoxCap.style.backgroundColor = PortColor;
+                // But if it's compatible, light this port up
+                m_ConnectorBoxCap.style.opacity = 1;
             }
         }
 
@@ -320,7 +324,7 @@ namespace GraphViewBase {
                 }
 
                 // But if it's compatible, update caps as appropriate 
-                UpdateCapColor();
+                UpdateCapVisiblity();
             }
         }
 
@@ -333,7 +337,7 @@ namespace GraphViewBase {
                 if (dropPayload.GetPayload().Count == 0) throw new("Drop payload was unexpectedly empty");
 
                 // But if it's compatible, update caps as appropriate 
-                UpdateCapColor();
+                UpdateCapVisiblity();
             }
         }
 
