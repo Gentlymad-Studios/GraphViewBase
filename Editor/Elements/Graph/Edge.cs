@@ -11,8 +11,8 @@ namespace GraphViewBase {
         private const float k_InterceptWidth = 6.0f;
         private const float k_EdgeLengthFromPort = 12.0f;
         private const float k_EdgeTurnDiameter = 20.0f;
-        private const int k_DefaultEdgeWidth = 2;
-        private const int k_DefaultEdgeWidthSelected = 2;
+        private const float k_DefaultEdgeWidth = 2;
+        private const float k_DefaultEdgeWidthSelected = 2;
         private static readonly Color s_DefaultSelectedColor = new(240 / 255f, 240 / 255f, 240 / 255f);
         private static readonly Color s_DefaultColor = new(146 / 255f, 146 / 255f, 146 / 255f);
 
@@ -25,7 +25,7 @@ namespace GraphViewBase {
         private float m_CapRadius = 5;
         private bool m_ControlPointsDirty = true;
 
-        private int m_EdgeWidth = 2;
+        private float m_EdgeWidth = 2;
         private VisualElement m_FromCap;
         private Color m_FromCapColor;
         private Color m_InputColor = Color.grey;
@@ -104,6 +104,13 @@ namespace GraphViewBase {
             }
         }
 
+        public Color EdgeColor {
+            set {
+                InputColor = value;
+                OutputColor = value;
+            }
+        }
+
         public Color FromCapColor {
             get => m_FromCapColor;
             set {
@@ -135,7 +142,7 @@ namespace GraphViewBase {
             }
         }
 
-        public int EdgeWidth {
+        public float EdgeWidth {
             get => m_EdgeWidth;
             set {
                 if (m_EdgeWidth == value) { return; }
@@ -182,8 +189,8 @@ namespace GraphViewBase {
             }
         }
 
-        public virtual int EdgeWidthUnselected { get; } = k_DefaultEdgeWidth;
-        public virtual int EdgeWidthSelected { get; } = k_DefaultEdgeWidthSelected;
+        public virtual float EdgeWidthUnselected { get; } = k_DefaultEdgeWidth;
+        public virtual float EdgeWidthSelected { get; } = k_DefaultEdgeWidthSelected;
         public virtual Color ColorSelected { get; } = s_DefaultSelectedColor;
         public virtual Color ColorUnselected { get; } = s_DefaultColor;
         public float InterceptWidth { get; set; } = 5f;
@@ -420,7 +427,7 @@ namespace GraphViewBase {
                 return; // Don't draw anything
             }
 
-            // Color outColor = this.outputColor;
+            Color outColor = OutputColor;
             Color inColor = InputColor;
 
             int cpt = m_RenderPoints.Count;
@@ -428,19 +435,26 @@ namespace GraphViewBase {
 
             float width = EdgeWidth;
 
-            // float alpha = 1.0f;
+            float alpha = 1.0f;
             float zoom = Graph.CurrentScale;
 
-            if (EdgeWidth * zoom < k_MinEdgeWidth) {
+            if (EdgeWidth * zoom < k_MinEdgeWidth)
+            {
                 // alpha = edgeWidth * zoom / k_MinEdgeWidth;
                 width = k_MinEdgeWidth / zoom;
             }
 
-            // k_Gradient.SetKeys(new[]{ new GradientColorKey(outColor, 0),new GradientColorKey(inColor, 1)},new []{new GradientAlphaKey(alpha, 0)});
             painter2D.BeginPath();
-
-            // painter2D.strokeGradient = k_Gradient;
-            painter2D.strokeColor = inColor;
+            if (inColor == outColor)
+            {
+                painter2D.strokeColor = inColor;
+            }
+            else
+            {
+                Gradient k_Gradient = new Gradient();
+                k_Gradient.SetKeys(new[] { new GradientColorKey(outColor, 0), new GradientColorKey(inColor, 1) }, new[] { new GradientAlphaKey(alpha, 0) });
+                painter2D.strokeGradient = k_Gradient;
+            }
             painter2D.lineWidth = width;
             painter2D.MoveTo(m_RenderPoints[0]);
 

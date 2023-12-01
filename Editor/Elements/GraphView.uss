@@ -90,8 +90,13 @@
     flex-grow: 0;
 }
 
-.port:hover .port-connector-cap{
+.port .port-connector-cap {
     background-color: rgb(240, 240, 240);
+    opacity: 0;
+}
+
+.port:hover .port-connector-cap {
+    opacity: 1;
 }
 
 .port-input {
