@@ -145,7 +145,7 @@ namespace GraphViewBase {
                 if (current is GraphView.Layer) { break; }
 
                 // if we encounter our node ignore it but continue in the case there are nodes inside nodes
-                if (current != port.ParentNode) { port.UnregisterCallback<GeometryChangedEvent>(OnGeometryChanged); }
+                if (current != port.ParentNode) { current.UnregisterCallback<GeometryChangedEvent>(OnGeometryChanged); }
 
                 current = current.hierarchy.parent;
             }
