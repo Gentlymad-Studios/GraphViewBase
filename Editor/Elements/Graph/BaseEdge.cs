@@ -211,7 +211,7 @@ namespace GraphViewBase {
             overrideValueToSet = position;
             if (overrideFlagToSet != true) {
                 overrideFlagToSet = true;
-                portToUpdate?.UpdateCapColor();
+                portToUpdate?.UpdateCapVisiblity();
             }
             OnEdgeChanged();
         }
@@ -219,8 +219,8 @@ namespace GraphViewBase {
         public void UnsetPositionOverrides() {
             m_InputPositionOverridden = false;
             m_OutputPositionOverridden = false;
-            m_InputPort?.UpdateCapColor();
-            m_OutputPort?.UpdateCapColor();
+            m_InputPort?.UpdateCapVisiblity();
+            m_OutputPort?.UpdateCapVisiblity();
             OnEdgeChanged();
         }
 
