@@ -514,13 +514,13 @@ namespace GraphViewBase {
         #region Event Handlers
         protected override void OnAddedToGraphView() {
             base.OnAddedToGraphView();
-            Graph.OnViewTransformChanged += MarkDirtyOnTransformChanged;
+            //Graph.OnViewTransformChanged += MarkDirtyOnTransformChanged;
             OnEdgeChanged();
         }
 
         protected override void OnRemovedFromGraphView() {
             base.OnRemovedFromGraphView();
-            Graph.OnViewTransformChanged -= MarkDirtyOnTransformChanged;
+            //Graph.OnViewTransformChanged -= MarkDirtyOnTransformChanged;
             UpdateEdgeCaps();
         }
 

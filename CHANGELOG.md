@@ -59,3 +59,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.3] - 2023-11-24
 ### Fixed
 - Fixed invalid cast errors when using port lists and CommentGroupNodes (fixes: https://github.com/Gentlymad-Studios/NewGraph/issues/33), thanks to https://github.com/leissler for the pull request!
+
+## [0.1.4] - 2025-01-23
+### Changed
+- disabled MarkDirtyRepaint call in OnViewportChangedEvent for better performance
