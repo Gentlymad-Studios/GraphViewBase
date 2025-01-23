@@ -63,3 +63,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.4] - 2025-01-23
 ### Changed
 - disabled MarkDirtyRepaint call in OnViewportChangedEvent for better performance
+
+## [0.1.5] - 2025-01-23
+### Fixed
+- making graph view base ready for unity 6, changing event method signatures (https://docs.unity3d.com/Manual/UIE-Events-Dispatching.html)
