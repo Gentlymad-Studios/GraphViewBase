@@ -251,8 +251,13 @@ namespace GraphViewBase {
 
         #region Event Handlers 
         [EventInterest(typeof(DragOfferEvent), typeof(DropEnterEvent), typeof(DropEvent), typeof(DropExitEvent))]
+#if UNITY_6000_0_OR_NEWER
+        protected override void HandleEventBubbleUp(EventBase evt) {
+            base.HandleEventBubbleUp(evt);
+#else
         protected override void ExecuteDefaultActionAtTarget(EventBase evt) {
             base.ExecuteDefaultActionAtTarget(evt);
+#endif
             if (evt.eventTypeId == DragOfferEvent.TypeId()) OnDragOffer((DragOfferEvent)evt);
             else if (evt.eventTypeId == DropEnterEvent.TypeId()) OnDropEnter((DropEnterEvent)evt);
             else if (evt.eventTypeId == DropEvent.TypeId()) OnDrop((DropEvent)evt);

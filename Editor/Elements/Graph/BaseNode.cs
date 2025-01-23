@@ -100,8 +100,13 @@ namespace GraphViewBase {
         #region Drag Events
 
         [EventInterest(typeof(DragOfferEvent))]
+#if UNITY_6000_0_OR_NEWER
+        protected override void HandleEventBubbleUp(EventBase evt) {
+            base.HandleEventBubbleUp(evt);
+#else
         protected override void ExecuteDefaultActionAtTarget(EventBase evt) {
             base.ExecuteDefaultActionAtTarget(evt);
+#endif
             if (evt.eventTypeId == DragOfferEvent.TypeId()) { OnDragOffer((DragOfferEvent)evt); }
         }
 

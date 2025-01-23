@@ -283,9 +283,14 @@ namespace GraphViewBase {
 
         [EventInterest(typeof(MouseMoveEvent), typeof(DragOfferEvent), typeof(DragEvent), typeof(DragEndEvent), typeof(DragCancelEvent),
             typeof(DropEnterEvent), typeof(DropEvent), typeof(DropExitEvent))]
+#if UNITY_6000_0_OR_NEWER
+        protected override void HandleEventBubbleUp(EventBase evt) {
+            base.HandleEventBubbleUp(evt);
+#else
         protected override void ExecuteDefaultActionAtTarget(EventBase evt) {
             base.ExecuteDefaultActionAtTarget(evt);
-            
+#endif
+
             switch (evt.eventTypeId) {
                 case long v when v == MouseMoveEvent.TypeId():
                     mousePosition = ((MouseMoveEvent)evt).mousePosition;
@@ -468,7 +473,13 @@ namespace GraphViewBase {
         #endregion
 
         #region Keybinding
+#if UNITY_6000_0_OR_NEWER
+        protected override void HandleEventTrickleDown(EventBase baseEvent) {
+            base.HandleEventTrickleDown(baseEvent);
+#else
         protected override void ExecuteDefaultAction(EventBase baseEvent) {
+            base.ExecuteDefaultAction(baseEvent);
+#endif
             if (baseEvent is not KeyDownEvent evt) { return; }
             ExecuteShortcutHandler(evt.keyCode, evt.modifiers);
         }
