@@ -62,7 +62,9 @@ namespace GraphViewBase {
         protected virtual void OnRemovedFromGraphView() {
             pickingMode = PickingMode.Position;
             Selected = false;
-            ResetLayer();
+
+            //ResetLayer shouldn't be necessary after we removed the GraphElement
+            //ResetLayer();
         }
         #endregion
 

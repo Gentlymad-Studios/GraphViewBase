@@ -67,3 +67,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.5] - 2025-01-23
 ### Fixed
 - making graph view base ready for unity 6, changing event method signatures (https://docs.unity3d.com/Manual/UIE-Events-Dispatching.html)
+
+## [0.1.6] - 2025-01-31
+### Changed
+- disable ResetLayer for an Element that was removed
