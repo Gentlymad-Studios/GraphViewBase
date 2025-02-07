@@ -111,13 +111,11 @@ namespace GraphViewBase {
         }
 
         private void OnDragOffer(DragOfferEvent e) {
-
             if (Graph != null && Graph.IsViewDrag(e)) {
                 Graph.OnDragOffer(e, true);
             } else {
-
-                // Check if this is a node drag event 
-                if (!IsNodeDrag(e) || !IsMovable()) {
+                // Check if this is a node drag event, additionaly check if the current dragged element is an edge
+                if (!IsNodeDrag(e) || !IsMovable() || e.GetDraggedElement() is BaseEdge) {
                     return;
                 }
 

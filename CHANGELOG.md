@@ -71,3 +71,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.6] - 2025-01-31
 ### Changed
 - disable ResetLayer for an Element that was removed
+
+## [0.1.7] - 2025-02-07
+### Fixed
+- dragofferevent for node will now check if there is already an edge dragged (unity 6000 issue)
